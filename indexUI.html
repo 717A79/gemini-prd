@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调拨计划管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .enterprise-green { background-color: #008c5e; }
+        .enterprise-green-text { color: #008c5e; }
+        .enterprise-border { border-color: #008c5e; }
+        .animate-bounce-slow { animation: bounce 3s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="min-h-screen flex flex-col">
+        <!-- Top Navigation -->
+        <header class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+            <div class="flex items-center space-x-4">
+                <div class="w-8 h-8 enterprise-green rounded flex items-center justify-center">
+                    <i class="fas fa-exchange-alt text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">调拨计划管理系统 <span class="text-sm font-normal text-gray-500 ml-2">v2.1.0</span></h1>
+            </div>
+            
+            <div class="flex bg-gray-100 p-1 rounded-lg">
+                <button
+                    onclick="switchViewMode('PRD')"
+                    id="prd-btn"
+                    class="px-6 py-2 rounded-md transition-all bg-white shadow-sm text-green-700 font-semibold"
+                >
+                    <i class="fas fa-file-alt mr-2"></i> 需求文档 (PRD)
+                </button>
+                <button
+                    onclick="switchViewMode('PROTOTYPE')"
+                    id="prototype-btn"
+                    class="px-6 py-2 rounded-md transition-all text-gray-600 hover:text-gray-900"
+                >
+                    <i class="fas fa-desktop mr-2"></i> 交互原型
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-auto bg-gray-50">
+            <!-- PRD View -->
+            <div id="prd-view" class="max-w-4xl mx-auto py-10 px-6">
+                <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                    <div class="enterprise-green px-8 py-10 text-white">
+                        <h1 class="text-3xl font-bold mb-2">录入调拨计划增加“取消审核”功能需求文档</h1>
+                        <p class="opacity-90">版本: 1.0 | 状态: 评审中 | 分析师: AI Expert</p>
+                    </div>
+
+                    <div class="p-8 space-y-8 text-gray-700 leading-relaxed">
+                        <!-- Section 1: Background -->
+                        <section>
+                            <h2 class="text-xl font-bold border-l-4 border-green-600 pl-3 mb-4 text-gray-900">1. 业务背景</h2>
+                            <p class="bg-gray-50 p-4 rounded-lg italic">
+                                当前系统中，调拨计划一旦通过“审核”操作进入“已审核”状态，将锁定相关物料和单据。若业务人员发现审核后的单据存在录入错误或需临时调整，目前唯一路径是点击“取消”作废单据，随后必须重新手动创建一份完全一致的新单据。这导致了极大的重复工作量和人为差错风险。
+                            </p>
+                        </section>
+
+                        <!-- Section 2: Requirement Description -->
+                        <section>
+                            <h2 class="text-xl font-bold border-l-4 border-green-600 pl-3 mb-4 text-gray-900">2. 功能目标</h2>
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li>允许用户对处于 <span class="font-semibold text-blue-600">已审核</span> 状态且 <span class="font-semibold text-red-600">未进行后续下发/执行操作</span> 的调拨计划执行“取消审核”。</li>
+                                <li>取消审核后，单据应回滚至 <span class="font-semibold text-orange-600">待审核</span> 状态，允许重新编辑修改。</li>
+                            </ul>
+                        </section>
+
+                        <!-- Section 3: Functional Details -->
+                        <section>
+                            <h2 class="text-xl font-bold border-l-4 border-green-600 pl-3 mb-4 text-gray-900">3. 详细功能说明</h2>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="border border-gray-200 p-3 text-left">场景</th>
+                                            <th class="border border-gray-200 p-3 text-left">前置条件</th>
+                                            <th class="border border-gray-200 p-3 text-left">期望结果</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-200 p-3 font-medium">正常流转</td>
+                                            <td class="border border-gray-200 p-3">单据状态 = 已审核</td>
+                                            <td class="border border-gray-200 p-3">点击“取消审核”，状态变为“待审核”，并在日志中记录操作人。</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-200 p-3 font-medium">阻断场景</td>
+                                            <td class="border border-gray-200 p-3">单据已下发或已取消</td>
+                                            <td class="border border-gray-200 p-3">“取消审核”按钮置灰不可用，或点击提示“该单据已进入执行环节，无法取消审核”。</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Section 4: Interaction Design -->
+                        <section>
+                            <h2 class="text-xl font-bold border-l-4 border-green-600 pl-3 mb-4 text-gray-900">4. 交互逻辑</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-4 rounded border border-blue-100">
+                                    <h3 class="font-bold text-blue-800 mb-2">位置</h3>
+                                    <p>列表页操作栏工具条，位于“审核”与“取消”按钮之间。</p>
+                                </div>
+                                <div class="bg-orange-50 p-4 rounded border border-orange-100">
+                                    <h3 class="font-bold text-orange-800 mb-2">确认提示</h3>
+                                    <p>点击操作后弹出确认弹窗：“确定要取消对选中单据的审核吗？取消后单据将变为待审核状态”。</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section 5: Data Log -->
+                        <section>
+                            <h2 class="text-xl font-bold border-l-4 border-green-600 pl-3 mb-4 text-gray-900">5. 日志与权限</h2>
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li>权限控制：需具备“审核”权限的人员方可执行“取消审核”。</li>
+                                <li>审计追踪：系统需记录“操作时间”、“操作人”、“操作动作：取消审核”、“前置状态：已审核”、“后置状态：待审核”。</li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prototype View -->
+            <div id="prototype-view" class="flex flex-col h-full bg-gray-50 hidden">
+                <!-- Search Panel -->
+                <div class="bg-white m-4 p-6 rounded-lg shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-6 text-gray-700 font-bold">
+                        <div class="w-1.5 h-5 enterprise-green mr-2 rounded-full"></div>
+                        查询
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-sm text-gray-500">来源单号</label>
+                            <input 
+                                type="text" 
+                                placeholder="多个请用逗号间隔" 
+                                class="border border-gray-300 rounded px-3 py-2 focus:ring-1 focus:ring-green-500 outline-none text-sm"
+                                id="search-id"
+                                oninput="handleSearch()"
+                            />
+                        </div>
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-sm text-gray-500">发货账仓</label>
+                            <select class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                                <option>Select</option>
+                                <option>N50-珠海基地</option>
+                                <option>N55-合肥基地</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-sm text-gray-500">收货账仓</label>
+                            <select class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                                <option>Select</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col space-y-1.5">
+                            <label class="text-sm text-gray-500">订单状态</label>
+                            <select class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                                <option>Select</option>
+                                <option>已审核</option>
+                                <option>待审核</option>
+                                <option>已取消</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6 space-x-3">
+                        <button class="px-5 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50 text-sm transition-colors">重置</button>
+                        <button class="px-5 py-2 enterprise-green text-white rounded hover:opacity-90 text-sm transition-colors shadow-sm">查询</button>
+                    </div>
+                </div>
+
+                <!-- List Action Bar -->
+                <div class="bg-white mx-4 px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-lg">
+                    <div class="flex items-center text-gray-700 font-bold">
+                        <div class="w-1.5 h-5 enterprise-green mr-2 rounded-full"></div>
+                        列表
+                    </div>
+                </div>
+                
+                <div class="bg-white mx-4 px-6 py-4 flex flex-wrap gap-2 border-b border-gray-100">
+                    <button class="flex items-center px-4 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded text-sm hover:bg-green-100">
+                        <i class="fas fa-plus mr-1.5"></i> 新增
+                    </button>
+                    <button class="flex items-center px-4 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded text-sm hover:bg-indigo-100">
+                        <i class="fas fa-file-import mr-1.5"></i> 导入调拨计划
+                    </button>
+                    <button 
+                        onclick="handleAudit()"
+                        class="flex items-center px-4 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700 shadow-sm"
+                    >
+                        <i class="fas fa-check-circle mr-1.5"></i> 审核
+                    </button>
+                    
+                    <!-- NEW BUTTON: 取消审核 -->
+                    <button 
+                        onclick="handleCancelAudit()"
+                        id="cancel-audit-btn"
+                        class="flex items-center px-4 py-1.5 bg-gray-100 text-gray-400 border border-gray-200 rounded text-sm cursor-not-allowed"
+                    >
+                        <i class="fas fa-undo-alt mr-1.5"></i> 取消审核
+                    </button>
+
+                    <button class="flex items-center px-4 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded text-sm hover:bg-red-100">
+                        <i class="fas fa-times-circle mr-1.5"></i> 取消
+                    </button>
+                    <button class="flex items-center px-4 py-1.5 bg-blue-50 border border-blue-200 text-blue-600 rounded text-sm hover:bg-blue-100">
+                        <i class="fas fa-cloud-download-alt mr-1.5"></i> 下发调拨
+                    </button>
+                    <button class="flex items-center px-4 py-1.5 bg-gray-50 border border-gray-200 text-gray-600 rounded text-sm hover:bg-gray-100 ml-auto">
+                        <i class="fas fa-file-export mr-1.5"></i> 导出
+                    </button>
+                </div>
+
+                <!-- Table Area -->
+                <div class="mx-4 bg-white shadow-sm overflow-hidden flex-1 rounded-b-lg mb-6">
+                    <div class="overflow-x-auto h-full">
+                        <table class="w-full text-left border-collapse min-w-[1200px]">
+                            <thead class="bg-gray-50 sticky top-0 border-b border-gray-200 z-10">
+                                <tr class="text-gray-500 text-xs uppercase tracking-wider">
+                                    <th class="px-4 py-4 w-10">
+                                        <input 
+                                            type="checkbox" 
+                                            id="select-all"
+                                            onclick="toggleSelectAll()"
+                                        />
+                                    </th>
+                                    <th class="px-4 py-4">来源单号</th>
+                                    <th class="px-4 py-4">业务类型</th>
+                                    <th class="px-4 py-4">调拨品类</th>
+                                    <th class="px-4 py-4">发货账仓</th>
+                                    <th class="px-4 py-4">收货账仓</th>
+                                    <th class="px-4 py-4">客户名称</th>
+                                    <th class="px-4 py-4">调拨状态</th>
+                                    <th class="px-4 py-4">调拨类型</th>
+                                    <th class="px-4 py-4">业务部门</th>
+                                    <th class="px-4 py-4 sticky right-0 bg-gray-50 shadow-[-10px_0_10px_-10px_rgba(0,0,0,0.1)]">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100" id="data-table-body">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Status Legend for demo -->
+                <div class="fixed bottom-10 right-10 bg-white p-4 rounded-lg shadow-xl border border-gray-200 text-xs space-y-2 max-w-xs animate-bounce-slow">
+                    <h4 class="font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-lightbulb text-yellow-400 mr-2"></i> 交互提示
+                    </h4>
+                    <p class="text-gray-500">1. 勾选“已审核”状态的单据</p>
+                    <p class="text-gray-500">2. 点击“取消审核”按钮</p>
+                    <p class="text-gray-500">3. 观察状态回滚至“待审核”</p>
+                </div>
+
+                <!-- Confirmation Modal -->
+                <div id="confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+                    <div class="bg-white rounded-lg shadow-2xl w-[400px] overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-3 text-orange-600 mb-4">
+                                <i class="fas fa-exclamation-triangle text-2xl"></i>
+                                <h3 class="text-lg font-bold">操作确认</h3>
+                            </div>
+                            <p class="text-gray-600">
+                                确定要取消对选中 <span class="font-bold text-gray-900" id="selected-count">0</span> 份单据的审核吗？
+                                <br />
+                                <span class="text-sm text-gray-400 mt-2 block italic">取消后单据将变回“待审核”状态，允许业务人员再次修改。</span>
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 border-t border-gray-100">
+                            <button 
+                                onclick="closeConfirmModal()"
+                                class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition-colors text-sm"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onclick="confirmCancelAudit()"
+                                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors text-sm shadow-sm"
+                            >
+                                确定取消审核
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 py-3 px-6 text-center text-xs text-gray-400">
+            &copy; 2024 系统需求分析 - 调拨计划增强功能方案
+        </footer>
+    </div>
+
+    <script>
+        // Data and State Management
+        const INITIAL_DATA = [
+            { id: '1', sourceId: 'BK26012100010', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'N50-珠海基地', receivingWarehouse: 'N55-合肥基地', customerName: '190013-笑死你有限公司', status: '已审核', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+            { id: '2', sourceId: 'BK26012100009', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'N55-合肥基地', receivingWarehouse: 'N48-长沙基地', customerName: '110707-网批龙哈哈测试', status: '已取消', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+            { id: '3', sourceId: 'BK26012100007', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'N55-合肥基地', receivingWarehouse: 'N48-长沙基地', customerName: '110707-网批龙哈哈测试', status: '已取消', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+            { id: '4', sourceId: 'BK26012100008', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'N55-合肥基地', receivingWarehouse: 'N48-长沙基地', customerName: '125678-数科龙哈哈', status: '已审核', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+            { id: '5', sourceId: 'BK26012100006', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'Z21-中山小家电成品仓', receivingWarehouse: 'N48-长沙基地', customerName: '323-集采测试科技', status: '已寻源', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+            { id: '6', sourceId: 'BK26012100005', businessType: '实物调拨', itemCategory: '内销家用', shippingWarehouse: 'N51-郑州基地', receivingWarehouse: 'N55-合肥基地', customerName: '323-集采测试科技', status: '已取消', transferType: '补货', dept: 'JSB-技术部', createdAt: '2025-10-21' },
+        ];
+
+        let data = [...INITIAL_DATA];
+        let selectedIds = [];
+        let searchId = '';
+        let currentViewMode = 'PRD';
+
+        // DOM Elements
+        const prdView = document.getElementById('prd-view');
+        const prototypeView = document.getElementById('prototype-view');
+        const prdBtn = document.getElementById('prd-btn');
+        const prototypeBtn = document.getElementById('prototype-btn');
+        const cancelAuditBtn = document.getElementById('cancel-audit-btn');
+        const confirmModal = document.getElementById('confirm-modal');
+        const selectedCount = document.getElementById('selected-count');
+
+        // View Mode Switching
+        function switchViewMode(mode) {
+            currentViewMode = mode;
+            
+            if (mode === 'PRD') {
+                prdView.classList.remove('hidden');
+                prototypeView.classList.add('hidden');
+                prdBtn.classList.add('bg-white', 'shadow-sm', 'text-green-700', 'font-semibold');
+                prdBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+                prototypeBtn.classList.remove('bg-white', 'shadow-sm', 'text-green-700', 'font-semibold');
+                prototypeBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+            } else {
+                prdView.classList.add('hidden');
+                prototypeView.classList.remove('hidden');
+                prototypeBtn.classList.add('bg-white', 'shadow-sm', 'text-green-700', 'font-semibold');
+                prototypeBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+                prdBtn.classList.remove('bg-white', 'shadow-sm', 'text-green-700', 'font-semibold');
+                prdBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+            }
+        }
+
+        // Search Functionality
+        function handleSearch() {
+            searchId = document.getElementById('search-id').value;
+            renderTable();
+        }
+
+        // Selection Functions
+        function toggleSelect(id) {
+            if (selectedIds.includes(id)) {
+                selectedIds = selectedIds.filter(i => i !== id);
+            } else {
+                selectedIds.push(id);
+            }
+            updateSelectionState();
+            renderTable();
+        }
+
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('select-all');
+            const filteredData = data.filter(item => item.sourceId.includes(searchId));
+            
+            if (selectAllCheckbox.checked) {
+                selectedIds = filteredData.map(item => item.id);
+            } else {
+                selectedIds = [];
+            }
+            updateSelectionState();
+            renderTable();
+        }
+
+        function updateSelectionState() {
+            // Update select all checkbox
+            const selectAllCheckbox = document.getElementById('select-all');
+            const filteredData = data.filter(item => item.sourceId.includes(searchId));
+            selectAllCheckbox.checked = selectedIds.length === filteredData.length && filteredData.length > 0;
+            
+            // Update cancel audit button state
+            if (selectedIds.length > 0) {
+                cancelAuditBtn.classList.remove('bg-gray-100', 'text-gray-400', 'border-gray-200', 'cursor-not-allowed');
+                cancelAuditBtn.classList.add('bg-orange-500', 'text-white', 'border-orange-600', 'hover:bg-orange-600');
+            } else {
+                cancelAuditBtn.classList.add('bg-gray-100', 'text-gray-400', 'border-gray-200', 'cursor-not-allowed');
+                cancelAuditBtn.classList.remove('bg-orange-500', 'text-white', 'border-orange-600', 'hover:bg-orange-600');
+            }
+        }
+
+        // Audit Functions
+        function handleAudit() {
+            if (selectedIds.length === 0) {
+                alert('请选择要审核的单据');
+                return;
+            }
+            
+            data = data.map(item => 
+                selectedIds.includes(item.id) && item.status !== '已取消' 
+                    ? { ...item, status: '已审核' } 
+                    : item
+            );
+            selectedIds = [];
+            updateSelectionState();
+            renderTable();
+        }
+
+        function handleCancelAudit() {
+            if (selectedIds.length === 0) return;
+            
+            // Check if any selected items are NOT audited
+            const nonAuditedItems = data.filter(i => selectedIds.includes(i.id) && i.status !== '已审核');
+            if (nonAuditedItems.length > 0) {
+                alert('只有“已审核”状态的单据才能执行取消审核操作');
+                return;
+            }
+
+            // Show confirm modal
+            selectedCount.textContent = selectedIds.length;
+            confirmModal.classList.remove('hidden');
+        }
+
+        function confirmCancelAudit() {
+            data = data.map(item => 
+                selectedIds.includes(item.id) 
+                    ? { ...item, status: '待审核' } 
+                    : item
+            );
+            selectedIds = [];
+            updateSelectionState();
+            renderTable();
+            closeConfirmModal();
+        }
+
+        function closeConfirmModal() {
+            confirmModal.classList.add('hidden');
+        }
+
+        // Status Color Mapping
+        function getStatusColor(status) {
+            switch (status) {
+                case '已审核':
+                    return 'text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200';
+                case '已取消':
+                    return 'text-red-500 bg-red-50 px-2 py-1 rounded border border-red-200';
+                case '待审核':
+                    return 'text-orange-500 bg-orange-50 px-2 py-1 rounded border border-orange-200';
+                case '已寻源':
+                    return 'text-blue-500 bg-blue-50 px-2 py-1 rounded border border-blue-200';
+                default:
+                    return 'text-gray-500';
+            }
+        }
+
+        // Table Rendering
+        function renderTable() {
+            const tableBody = document.getElementById('data-table-body');
+            const filteredData = data.filter(item => item.sourceId.includes(searchId));
+            
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colSpan="11" class="text-center py-20 text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-4 block"></i>
+                            暂无数据
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = filteredData.map(row => `
+                <tr class="${selectedIds.includes(row.id) ? 'bg-blue-50' : ''} hover:bg-blue-50/50 transition-colors text-sm">
+                    <td class="px-4 py-3">
+                        <input 
+                            type="checkbox" 
+                            ${selectedIds.includes(row.id) ? 'checked' : ''}
+                            onclick="toggleSelect('${row.id}')"
+                        />
+                    </td>
+                    <td class="px-4 py-3 font-mono text-gray-700">${row.sourceId}</td>
+                    <td class="px-4 py-3">${row.businessType}</td>
+                    <td class="px-4 py-3">${row.itemCategory}</td>
+                    <td class="px-4 py-3 text-xs text-gray-600">${row.shippingWarehouse}</td>
+                    <td class="px-4 py-3 text-xs text-gray-600">${row.receivingWarehouse}</td>
+                    <td class="px-4 py-3 max-w-xs truncate">${row.customerName}</td>
+                    <td class="px-4 py-3">
+                        <span class="${getStatusColor(row.status)}">
+                            ${row.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">${row.transferType}</td>
+                    <td class="px-4 py-3">${row.dept}</td>
+                    <td class="px-4 py-3 sticky right-0 bg-white shadow-[-10px_0_10px_-10px_rgba(0,0,0,0.1)]">
+                        <div class="flex space-x-3 text-green-700">
+                            <button class="hover:underline">编辑</button>
+                            <button class="hover:underline">详情</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize
+        function init() {
+            renderTable();
+        }
+
+        // Call init when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
