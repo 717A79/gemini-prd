@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI赋能OMS订单管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // 配置Tailwind自定义主题
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#4080FF',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        neutral: '#86909C',
+                        light: '#F2F3F5',
+                        dark: '#1D2129',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .sidebar-item-active {
+                @apply bg-primary/10 text-primary border-l-4 border-primary;
+            }
+            .ai-chat-bubble {
+                @apply rounded-lg p-3 max-w-[80%] mb-3;
+            }
+            .animate-pulse-slow {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 整体布局 -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white shadow-md flex-shrink-0">
+            <div class="p-4 border-b flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-shopping-cart text-primary text-xl"></i>
+                    <h1 class="text-lg font-bold">OMS智能管理系统</h1>
+                </div>
+                <button class="md:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- 导航菜单 -->
+            <nav class="py-4">
+                <ul>
+                    <li class="px-4 py-2">
+                        <a href="#" class="sidebar-item-active flex items-center gap-3 px-3 py-2 rounded-md">
+                            <i class="fa fa-home"></i>
+                            <span>仪表盘</span>
+                        </a>
+                    </li>
+                    <li class="px-4 py-2">
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fa fa-list-alt"></i>
+                            <span>订单管理</span>
+                        </a>
+                    </li>
+                    <li class="px-4 py-2">
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fa fa-users"></i>
+                            <span>客户管理</span>
+                        </a>
+                    </li>
+                    <li class="px-4 py-2">
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fa fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- AI功能专区 -->
+                <div class="px-4 py-4 mt-6">
+                    <h3 class="text-xs uppercase text-neutral font-semibold px-3 mb-2">AI智能功能</h3>
+                    <ul>
+                        <li class="px-4 py-1">
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-primary/5 text-primary transition-colors">
+                                <i class="fa fa-robot"></i>
+                                <span>AI订单助手</span>
+                            </a>
+                        </li>
+                        <li class="px-4 py-1">
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <span>异常智能预警</span>
+                            </a>
+                        </li>
+                        <li class="px-4 py-1">
+                            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                                <i class="fa fa-comments"></i>
+                                <span>智能客服</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- 用户信息 -->
+            <div class="absolute bottom-0 w-64 p-4 border-t">
+                <div class="flex items-center gap-3">
+                    <img src="https://picsum.photos/40/40" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div>
+                        <p class="text-sm font-medium">张经理</p>
+                        <p class="text-xs text-neutral">系统管理员</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 overflow-auto bg-gray-50">
+            <!-- 顶部导航 -->
+            <header class="bg-white shadow-sm py-3 px-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-lg font-semibold">AI订单智能助手</h2>
+                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">Beta</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <input type="text" placeholder="全局搜索..." class="pl-8 pr-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral"></i>
+                        </div>
+                        <button class="relative text-neutral hover:text-primary">
+                            <i class="fa fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="p-6">
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm p-5 border-l-4 border-primary">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-neutral text-sm">今日订单</p>
+                                <h3 class="text-2xl font-bold mt-1">1,284</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 12.5% 较昨日
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-file-text-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-5 border-l-4 border-success">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-neutral text-sm">已完成订单</p>
+                                <h3 class="text-2xl font-bold mt-1">987</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 8.2% 较昨日
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+                                <i class="fa fa-check-circle-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-5 border-l-4 border-warning">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-neutral text-sm">待处理订单</p>
+                                <h3 class="text-2xl font-bold mt-1">245</h3>
+                                <p class="text-danger text-xs mt-2 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 5.8% 较昨日
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-clock-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-5 border-l-4 border-danger">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-neutral text-sm">异常订单</p>
+                                <h3 class="text-2xl font-bold mt-1">52</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 18.3% 较昨日
+                                </p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+                                <i class="fa fa-exclamation-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI核心功能区 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- AI订单解析 -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg flex items-center gap-2">
+                                <i class="fa fa-magic text-primary"></i>
+                                AI订单智能解析
+                            </h3>
+                            <button class="text-sm text-primary hover:text-primary/80">
+                                <i class="fa fa-refresh mr-1"></i> 重新解析
+                            </button>
+                        </div>
+                        
+                        <!-- 订单输入区域 -->
+                        <div class="mb-4">
+                            <textarea placeholder="粘贴原始订单信息，AI将自动解析并结构化..." class="w-full border rounded-md p-3 h-32 focus:outline-none focus:ring-1 focus:ring-primary resize-none" id="orderText">客户名称：李小明，联系电话：13812345678，收货地址：上海市浦东新区张江高科技园区博云路2号，商品名称：iPhone 15 Pro 256G 原色钛金属，数量：1台，支付金额：7999元，支付方式：微信支付，下单时间：2026-01-20 14:30:25，备注：请尽快发货，需要电子发票</textarea>
+                        </div>
+                        
+                        <!-- AI解析结果 -->
+                        <div class="border rounded-md p-4 bg-gray-50">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <i class="fa fa-robot"></i>
+                                </div>
+                                <p class="font-medium">AI解析结果</p>
+                                <span class="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">已完成</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-neutral">客户信息</p>
+                                    <ul class="mt-2 space-y-1 text-sm">
+                                        <li><span class="font-medium">姓名：</span>李小明</li>
+                                        <li><span class="font-medium">电话：</span>13812345678</li>
+                                        <li><span class="font-medium">地址：</span>上海市浦东新区张江高科技园区博云路2号</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-neutral">订单信息</p>
+                                    <ul class="mt-2 space-y-1 text-sm">
+                                        <li><span class="font-medium">商品：</span>iPhone 15 Pro 256G 原色钛金属</li>
+                                        <li><span class="font-medium">数量：</span>1台</li>
+                                        <li><span class="font-medium">金额：</span>¥7,999.00</li>
+                                        <li><span class="font-medium">支付方式：</span>微信支付</li>
+                                        <li><span class="font-medium">下单时间：</span>2026-01-20 14:30:25</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- AI建议 -->
+                            <div class="mt-4 p-3 bg-primary/5 rounded-md">
+                                <p class="text-sm font-medium text-primary flex items-center gap-2">
+                                    <i class="fa fa-lightbulb-o"></i>
+                                    AI优化建议
+                                </p>
+                                <p class="text-sm mt-1">1. 检测到客户地址为办公区，建议工作日配送；2. 客户要求电子发票，已自动标记需开具增值税普通发票；3. 商品为高价值产品，建议使用保价快递。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI智能助手 -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
+                            <i class="fa fa-comments-o text-primary"></i>
+                            AI订单智能助手
+                        </h3>
+                        
+                        <!-- 聊天区域 -->
+                        <div class="border rounded-md p-3 h-80 overflow-y-auto mb-4 bg-gray-50 flex flex-col gap-3" id="chatContainer">
+                            <!-- AI欢迎消息 -->
+                            <div class="ai-chat-bubble bg-primary/5 self-start">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img src="https://picsum.photos/30/30" alt="AI助手" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-medium">AI订单助手</span>
+                                </div>
+                                <p class="text-sm">您好！我是您的AI订单助手，可以帮您查询订单、处理异常、生成报表等。请问有什么可以帮助您的？</p>
+                            </div>
+                            
+                            <!-- 用户消息 -->
+                            <div class="ai-chat-bubble bg-white shadow self-end">
+                                <div class="flex items-center gap-2 mb-1 justify-end">
+                                    <span class="text-xs font-medium">您</span>
+                                    <img src="https://picsum.photos/30/30" alt="用户" class="w-6 h-6 rounded-full">
+                                </div>
+                                <p class="text-sm">帮我分析一下今天异常订单的原因</p>
+                            </div>
+                            
+                            <!-- AI加载中 -->
+                            <div class="ai-chat-bubble bg-primary/5 self-start">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img src="https://picsum.photos/30/30" alt="AI助手" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-medium">AI订单助手</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow"></div>
+                                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow" style="animation-delay: 0.2s"></div>
+                                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow" style="animation-delay: 0.4s"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 输入区域 -->
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="输入您想查询或处理的订单问题..." class="flex-1 border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-primary" id="chatInput">
+                            <button class="bg-primary text-white rounded-md px-4 hover:bg-primary/90 transition-colors" id="sendBtn">
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI异常订单分析 -->
+                <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg flex items-center gap-2">
+                            <i class="fa fa-bar-chart text-primary"></i>
+                            AI异常订单智能分析
+                        </h3>
+                        <div class="flex gap-2">
+                            <select class="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                                <option>今日</option>
+                                <option>本周</option>
+                                <option>本月</option>
+                            </select>
+                            <button class="bg-primary/10 text-primary rounded-md px-3 py-1 text-sm hover:bg-primary/20 transition-colors">
+                                <i class="fa fa-download mr-1"></i> 导出报告
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 异常订单分析图表 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 异常类型分布 -->
+                        <div class="border rounded-md p-4">
+                            <h4 class="text-sm font-medium mb-3">异常类型分布</h4>
+                            <div class="h-64 flex items-center justify-center">
+                                <!-- 模拟图表 -->
+                                <div class="w-full h-full relative">
+                                    <canvas id="anomalyChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-primary"></span>
+                                    <span>地址错误 (32%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-warning"></span>
+                                    <span>库存不足 (28%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-danger"></span>
+                                    <span>支付异常 (22%)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-neutral"></span>
+                                    <span>其他原因 (18%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI处理建议 -->
+                        <div class="border rounded-md p-4">
+                            <h4 class="text-sm font-medium mb-3">AI智能处理建议</h4>
+                            <ul class="space-y-3 text-sm">
+                                <li class="flex gap-2">
+                                    <i class="fa fa-check-circle text-success mt-0.5"></i>
+                                    <div>
+                                        <p class="font-medium">地址错误订单</p>
+                                        <p class="text-neutral">AI已自动识别并修正15个明显的地址格式错误，剩余8个需要人工核实，已发送短信提醒客户确认。</p>
+                                    </div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <i class="fa fa-check-circle text-success mt-0.5"></i>
+                                    <div>
+                                        <p class="font-medium">库存不足订单</p>
+                                        <p class="text-neutral">AI已自动匹配可替代商品，并生成推荐列表，可一键向客户发送换货建议。</p>
+                                    </div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <i class="fa fa-check-circle text-success mt-0.5"></i>
+                                    <div>
+                                        <p class="font-medium">支付异常订单</p>
+                                        <p class="text-neutral">AI已识别出6笔重复支付订单，建议优先处理退款，避免客户投诉。</p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <button class="mt-4 w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors text-sm">
+                                <i class="fa fa-magic mr-1"></i> 应用AI处理方案
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 异常类型分布图表
+            const ctx = document.getElementById('anomalyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['地址错误', '库存不足', '支付异常', '其他原因'],
+                    datasets: [{
+                        data: [32, 28, 22, 18],
+                        backgroundColor: [
+                            '#165DFF',
+                            '#FF7D00',
+                            '#F53F3F',
+                            '#86909C'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 聊天功能
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const chatContainer = document.getElementById('chatContainer');
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // 添加用户消息
+                const userMessage = `
+                    <div class="ai-chat-bubble bg-white shadow self-end">
+                        <div class="flex items-center gap-2 mb-1 justify-end">
+                            <span class="text-xs font-medium">您</span>
+                            <img src="https://picsum.photos/30/30" alt="用户" class="w-6 h-6 rounded-full">
+                        </div>
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                chatContainer.insertAdjacentHTML('beforeend', userMessage);
+                
+                // 清空输入框
+                chatInput.value = '';
+                
+                // 移除之前的加载状态
+                const loadingElements = chatContainer.querySelectorAll('.animate-pulse-slow');
+                loadingElements.forEach(el => {
+                    if (el.closest('.ai-chat-bubble')) {
+                        el.closest('.ai-chat-bubble').remove();
+                    }
+                });
+                
+                // 添加加载状态
+                const loadingMessage = `
+                    <div class="ai-chat-bubble bg-primary/5 self-start">
+                        <div class="flex items-center gap-2 mb-1">
+                            <img src="https://picsum.photos/30/30" alt="AI助手" class="w-6 h-6 rounded-full">
+                            <span class="text-xs font-medium">AI订单助手</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow" style="animation-delay: 0.2s"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary animate-pulse-slow" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.insertAdjacentHTML('beforeend', loadingMessage);
+                
+                // 滚动到底部
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    // 移除加载状态
+                    loadingElements.forEach(el => {
+                        if (el.closest('.ai-chat-bubble')) {
+                            el.closest('.ai-chat-bubble').remove();
+                        }
+                    });
+                    
+                    // AI回复内容
+                    let aiReply = '';
+                    if (message.includes('异常订单') || message.includes('原因')) {
+                        aiReply = `
+                            <div class="ai-chat-bubble bg-primary/5 self-start">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img src="https://picsum.photos/30/30" alt="AI助手" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-medium">AI订单助手</span>
+                                </div>
+                                <p class="text-sm">今日异常订单共52笔，主要原因分析如下：<br><br>1. 地址错误（17笔，32.7%）：多为客户填写不规范或行政区划调整导致；<br>2. 库存不足（15笔，28.8%）：主要集中在iPhone 15 Pro系列热门型号；<br>3. 支付异常（11笔，21.2%）：多为网络波动导致的支付超时；<br>4. 其他原因（9笔，17.3%）：包括客户取消、信息不全等。<br><br>我已为您生成详细的异常订单处理建议，是否需要查看？</p>
+                            </div>
+                        `;
+                    } else {
+                        aiReply = `
+                            <div class="ai-chat-bubble bg-primary/5 self-start">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <img src="https://picsum.photos/30/30" alt="AI助手" class="w-6 h-6 rounded-full">
+                                    <span class="text-xs font-medium">AI订单助手</span>
+                                </div>
+                                <p class="text-sm">我理解您的需求是："${message}"。我可以帮助您完成订单查询、异常处理、数据分析等操作。您可以尝试提问：<br>1. 帮我查询订单号为OM20260120001的订单状态<br>2. 分析本周订单趋势<br>3. 处理所有地址错误的订单</p>
+                            </div>
+                        `;
+                    }
+                    
+                    chatContainer.insertAdjacentHTML('beforeend', aiReply);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 1500);
+            }
+
+            // 模拟AI订单解析按钮点击效果
+            document.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.classList.add('scale-95');
+                    setTimeout(() => {
+                        this.classList.remove('scale-95');
+                    }, 100);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
