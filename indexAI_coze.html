@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMS智能订单管理系统 - AI增强版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary-color: #1890ff;
+            --primary-hover: #40a9ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --danger-color: #ff4d4f;
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --text-light: #8c8c8c;
+            --bg-base: #f0f2f5;
+            --bg-white: #ffffff;
+            --border-color: #d9d9d9;
+            --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02);
+            --shadow-elevated: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: var(--bg-white);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-right: 40px;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-item {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 220px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            padding: 16px 0;
+        }
+
+        .menu-group {
+            margin-bottom: 8px;
+        }
+
+        .menu-title {
+            padding: 8px 24px;
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .menu-item {
+            padding: 10px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #e6f7ff;
+            color: var(--primary-color);
+        }
+
+        .menu-item.active {
+            background: #e6f7ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .menu-item .icon {
+            font-size: 16px;
+        }
+
+        /* 主内容区 */
+        .content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* AI智能搜索栏 */
+        .ai-search-section {
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .search-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 50px 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .search-suggestions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-tag {
+            background: #f0f7ff;
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .suggestion-tag:hover {
+            background: white;
+            border-color: var(--primary-color);
+        }
+
+        /* 传统筛选区域（收起状态） */
+        .filter-section {
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .filter-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .filter-toggle {
+            color: var(--primary-color);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-tag .close {
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .filter-tag .close:hover {
+            color: var(--danger-color);
+        }
+
+        /* 数据表格 */
+        .table-section {
+            background: var(--bg-white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-card);
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .table-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .stat-value.normal {
+            color: var(--success-color);
+        }
+
+        .stat-value.warning {
+            color: var(--warning-color);
+        }
+
+        .stat-value.danger {
+            color: var(--danger-color);
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafafa;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .order-id {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .order-id:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-normal {
+            background: #f6ffed;
+            color: var(--success-color);
+        }
+
+        .status-warning {
+            background: #fffbe6;
+            color: var(--warning-color);
+        }
+
+        .status-danger {
+            background: #fff1f0;
+            color: var(--danger-color);
+        }
+
+        .action-btn {
+            padding: 4px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .ai-suggestion-icon {
+            color: #9254de;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 8px;
+        }
+
+        /* AI助手悬浮窗 */
+        .ai-assistant {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 380px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-elevated);
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-assistant.minimized {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .ai-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .ai-header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-avatar {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .ai-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .ai-status {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        .ai-close {
+            cursor: pointer;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .ai-close:hover {
+            opacity: 1;
+        }
+
+        .ai-body {
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .ai-message {
+            margin-bottom: 16px;
+        }
+
+        .ai-message-content {
+            background: #f5f7fa;
+            padding: 12px 14px;
+            border-radius: 12px 12px 12px 2px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .ai-message.user .ai-message-content {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 2px 12px;
+        }
+
+        .ai-message-time {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        .ai-suggestion-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .suggestion-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-card:hover {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .suggestion-card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-card-title .icon {
+            color: #9254de;
+        }
+
+        .suggestion-card-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .ai-input-area {
+            padding: 12px 16px 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .ai-input-wrapper {
+            position: relative;
+        }
+
+        .ai-input {
+            width: 100%;
+            padding: 12px 44px 12px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            resize: none;
+            height: 80px;
+            font-family: inherit;
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .ai-send-btn {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 异常诊断弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-white);
+            border-radius: 12px;
+            width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(80vh - 130px);
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .ai-diagnosis-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title .ai-icon {
+            color: #9254de;
+        }
+
+        .diagnosis-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+        }
+
+        .diagnosis-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .diagnosis-badge {
+            background: var(--danger-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .diagnosis-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--danger-color);
+        }
+
+        .diagnosis-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .diagnosis-steps {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .recommended-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .action-card:hover {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .action-card.selected {
+            border-color: var(--primary-color);
+            background: #e6f7ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            background: #e6f7ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .action-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            background: white;
+        }
+
+        .btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* 快速操作面板 */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary-color);
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-icon {
+            font-size: 20px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .quick-action-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-elevated);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .toast.active {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 打字动画 */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 14px;
+            background: #f5f7fa;
+            border-radius: 12px 12px 12px 2px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <div class="logo">📦 SmartOMS</div>
+        <div class="nav-items">
+            <div class="nav-item active">订单管理</div>
+            <div class="nav-item">库存管理</div>
+            <div class="nav-item">客户服务</div>
+            <div class="nav-item">数据分析</div>
+            <div class="nav-item">系统设置</div>
+        </div>
+        <div class="user-info">
+            <div class="avatar">李</div>
+            <span style="font-size: 13px; color: var(--text-secondary);">李明 | 客服主管</span>
+        </div>
+    </div>
+
+    <!-- 主体内容 -->
+    <div class="main-container">
+        <!-- 左侧菜单 -->
+        <div class="sidebar">
+            <div class="menu-group">
+                <div class="menu-title">订单中心</div>
+                <div class="menu-item active">
+                    <span class="icon">📋</span>
+                    全部订单
+                </div>
+                <div class="menu-item">
+                    <span class="icon">⏰</span>
+                    待处理
+                </div>
+                <div class="menu-item">
+                    <span class="icon">🚚</span>
+                    已发货
+                </div>
+                <div class="menu-item">
+                    <span class="icon">⚠️</span>
+                    异常订单
+                </div>
+                <div class="menu-item">
+                    <span class="icon">↩️</span>
+                    退换货
+                </div>
+            </div>
+            <div class="menu-group">
+                <div class="menu-title">快捷操作</div>
+                <div class="menu-item">
+                    <span class="icon">➕</span>
+                    手动建单
+                </div>
+                <div class="menu-item">
+                    <span class="icon">📤</span>
+                    批量导出
+                </div>
+                <div class="menu-item">
+                    <span class="icon">🔍</span>
+                    智能筛选
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="content">
+            <!-- 快速操作面板 -->
+            <div class="quick-actions">
+                <div class="quick-action-btn" onclick="showAIAssistant()">
+                    <span class="quick-action-icon">🤖</span>
+                    <div class="quick-action-title">AI 助手</div>
+                </div>
+                <div class="quick-action-btn" onclick="quickSearch('异常订单')">
+                    <span class="quick-action-icon">⚠️</span>
+                    <div class="quick-action-title">异常订单</div>
+                </div>
+                <div class="quick-action-btn" onclick="quickSearch('今日待发货')">
+                    <span class="quick-action-icon">📦</span>
+                    <div class="quick-action-title">今日待发货</div>
+                </div>
+                <div class="quick-action-btn" onclick="quickSearch('加急订单')">
+                    <span class="quick-action-icon">🔥</span>
+                    <div class="quick-action-title">加急订单</div>
+                </div>
+            </div>
+
+            <!-- AI 智能搜索 -->
+            <div class="ai-search-section">
+                <div class="search-title">
+                    <span class="ai-badge">AI 智能搜索</span>
+                    用自然语言描述查找条件，例如："昨天北京地区的未发货加急订单"
+                </div>
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" id="aiSearchInput" placeholder="输入查询条件，或点击下方快捷筛选..." onkeypress="handleSearchKeypress(event)">
+                    <button class="search-btn" onclick="performAISearch()">🔍</button>
+                </div>
+                <div class="search-suggestions">
+                    <span class="suggestion-tag" onclick="applySuggestion('近7天未发货订单')">近7天未发货订单</span>
+                    <span class="suggestion-tag" onclick="applySuggestion('上海地区异常订单')">上海地区异常订单</span>
+                    <span class="suggestion-tag" onclick="applySuggestion('金额超过5000元的订单')">金额超过5000元</span>
+                    <span class="suggestion-tag" onclick="applySuggestion('VIP客户待处理订单')">VIP客户待处理</span>
+                    <span class="suggestion-tag" onclick="applySuggestion('库存不足待补货')">库存不足待补货</span>
+                </div>
+            </div>
+
+            <!-- 筛选条件展示 -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <div class="filter-title">当前筛选条件</div>
+                    <div class="filter-toggle" onclick="toggleAdvancedFilter()">展开高级筛选 ▼</div>
+                </div>
+                <div class="filter-tags" id="activeFilters">
+                    <span class="filter-tag">全部订单<span class="close">×</span></span>
+                </div>
+            </div>
+
+            <!-- 订单表格 -->
+            <div class="table-section">
+                <div class="table-header">
+                    <div class="table-title">订单列表</div>
+                    <div class="table-stats">
+                        <div class="stat-item">
+                            <span>总计:</span>
+                            <span class="stat-value" id="totalOrders">128</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>正常:</span>
+                            <span class="stat-value normal" id="normalOrders">102</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>警告:</span>
+                            <span class="stat-value warning" id="warningOrders">18</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>异常:</span>
+                            <span class="stat-value danger" id="abnormalOrders">8</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>订单编号</th>
+                                <th>客户信息</th>
+                                <th>订单金额</th>
+                                <th>下单时间</th>
+                                <th>收货地区</th>
+                                <th>订单状态</th>
+                                <th>异常标识</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 助手悬浮窗 -->
+    <div class="ai-assistant" id="aiAssistant">
+        <div class="ai-header" onclick="toggleAIAssistant()">
+            <div class="ai-header-content">
+                <div class="ai-avatar">🤖</div>
+                <div>
+                    <div class="ai-title">AI 智能助手</div>
+                    <div class="ai-status">在线 • 随时待命</div>
+                </div>
+            </div>
+            <div class="ai-close">×</div>
+        </div>
+        <div class="ai-body" id="aiBody">
+            <div class="ai-message">
+                <div class="ai-message-content">
+                    你好！我是你的智能订单助手。我可以帮你：
+                    <br>• 快速查询和筛选订单
+                    <br>• 诊断异常订单并给出处理建议
+                    <br>• 优化操作流程，提升效率
+                </div>
+                <div class="ai-message-time">刚刚</div>
+            </div>
+
+            <div class="ai-suggestion-cards">
+                <div class="suggestion-card" onclick="handleSuggestionCard('异常订单')">
+                    <div class="suggestion-card-title">
+                        <span class="icon">⚠️</span>
+                        查看需要处理的异常订单
+                    </div>
+                    <div class="suggestion-card-desc">当前有 8 笔异常订单需要处理，AI 已完成初步诊断</div>
+                </div>
+                <div class="suggestion-card" onclick="handleSuggestionCard('库存预警')">
+                    <div class="suggestion-card-title">
+                        <span class="icon">📦</span>
+                        库存预警提醒
+                    </div>
+                    <div class="suggestion-card-desc">3 个商品库存低于安全水位，建议及时补货</div>
+                </div>
+                <div class="suggestion-card" onclick="handleSuggestionCard('效率建议')">
+                    <div class="suggestion-card-title">
+                        <span class="icon">💡</span>
+                        效率优化建议
+                    </div>
+                    <div class="suggestion-card-desc">基于历史数据，发现可优化的操作流程</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        <div class="ai-input-area">
+            <div class="ai-input-wrapper">
+                <textarea class="ai-input" id="aiInput" placeholder="输入问题或指令，例如：帮我查一下上海地区的异常订单..." onkeypress="handleAIInputKeypress(event)"></textarea>
+                <button class="ai-send-btn" onclick="sendAIMessage()">→</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 异常诊断弹窗 -->
+    <div class="modal-overlay" id="diagnosisModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span>🤖</span>
+                    AI 异常订单诊断
+                </div>
+                <div class="modal-close" onclick="closeModal()">×</div>
+            </div>
+            <div class="modal-body">
+                <!-- 订单基本信息 -->
+                <div class="order-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">订单编号</span>
+                        <span class="info-value" id="modalOrderId">ORD-20250121-0001</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">客户名称</span>
+                        <span class="info-value" id="modalCustomer">张三</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">订单金额</span>
+                        <span class="info-value" id="modalAmount">¥ 2,580.00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">下单时间</span>
+                        <span class="info-value" id="modalTime">2025-01-20 14:32</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">收货地址</span>
+                        <span class="info-value" id="modalAddress">北京市朝阳区...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">订单状态</span>
+                        <span class="info-value" id="modalStatus">待发货</span>
+                    </div>
+                </div>
+
+                <!-- AI 诊断结果 -->
+                <div class="ai-diagnosis-section">
+                    <div class="section-title">
+                        <span class="ai-icon">🤖</span>
+                        AI 诊断结果
+                    </div>
+                    <div class="diagnosis-card">
+                        <div class="diagnosis-header">
+                            <span class="diagnosis-badge">高风险</span>
+                            <span class="diagnosis-title">库存不足 + 地址异常</span>
+                        </div>
+                        <div class="diagnosis-content">
+                            该订单存在两个主要问题：
+                            <br>1. 订单商品"无线蓝牙耳机 Pro"当前库存为 0，无法发货
+                            <br>2. 收货地址"北京市朝阳区国贸大厦A座"在系统历史记录中有3次配送失败记录
+                        </div>
+                        <div class="diagnosis-steps">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-content">联系仓库确认补货时间，预计3天内可到货</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-content">与客户确认收货地址是否正确，或提供其他配送方式</div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-content">根据客户反馈选择：等待补货/更换商品/取消订单</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 推荐操作 -->
+                <div class="ai-diagnosis-section">
+                    <div class="section-title">
+                        <span class="ai-icon">💡</span>
+                        推荐操作方案
+                    </div>
+                    <div class="recommended-actions">
+                        <div class="action-card selected" onclick="selectAction(this, 'wait')">
+                            <div class="action-icon">⏳</div>
+                            <div class="action-content">
+                                <div class="action-title">等待补货后发货</div>
+                                <div class="action-desc">预计3天内补货完成，主动联系客户说明情况</div>
+                            </div>
+                        </div>
+                        <div class="action-card" onclick="selectAction(this, 'replace')">
+                            <div class="action-icon">🔄</div>
+                            <div class="action-content">
+                                <div class="action-title">推荐同款替代商品</div>
+                                <div class="action-desc">推荐价格相近、库存充足的替代商品供客户选择</div>
+                            </div>
+                        </div>
+                        <div class="action-card" onclick="selectAction(this, 'address')">
+                            <div class="action-icon">📍</div>
+                            <div class="action-content">
+                                <div class="action-title">确认收货地址</div>
+                                <div class="action-desc">优先与客户确认地址，避免配送失败</div>
+                            </div>
+                        </div>
+                        <div class="action-card" onclick="selectAction(this, 'cancel')">
+                            <div class="action-icon">❌</div>
+                            <div class="action-content">
+                                <div class="action-title">取消订单并退款</div>
+                                <div class="action-desc">如客户同意，快速处理取消退款</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="executeAction()">执行选中操作</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast">
+        <span>✓</span>
+        <span id="toastMessage">操作成功</span>
+    </div>
+
+    <script>
+        // 模拟订单数据
+        const orderData = [
+            { id: 'ORD-20250121-0001', customer: '张三', phone: '138****1234', amount: 2580.00, time: '2025-01-20 14:32', region: '北京', status: '待发货', abnormal: 'high', abnormalText: '库存不足+地址异常' },
+            { id: 'ORD-20250121-0002', customer: '李四', phone: '139****5678', amount: 899.00, time: '2025-01-20 15:18', region: '上海', status: '已发货', abnormal: 'none', abnormalText: '' },
+            { id: 'ORD-20250121-0003', customer: '王五', phone: '137****9012', amount: 3299.00, time: '2025-01-20 16:45', region: '广州', status: '待发货', abnormal: 'warning', abnormalText: '地址需确认' },
+            { id: 'ORD-20250121-0004', customer: '赵六', phone: '136****3456', amount: 568.00, time: '2025-01-21 09:22', region: '深圳', status: '待处理', abnormal: 'none', abnormalText: '' },
+            { id: 'ORD-20250121-0005', customer: '钱七', phone: '135****7890', amount: 1299.00, time: '2025-01-21 10:15', region: '北京', status: '待发货', abnormal: 'high', abnormalText: '库存不足' },
+            { id: 'ORD-20250121-0006', customer: '孙八', phone: '134****2345', amount: 4599.00, time: '2025-01-21 11:30', region: '杭州', status: '已发货', abnormal: 'none', abnormalText: '' },
+            { id: 'ORD-20250121-0007', customer: '周九', phone: '133****6789', amount: 799.00, time: '2025-01-21 12:45', region: '上海', status: '待发货', abnormal: 'warning', abnormalText: '配送时间冲突' },
+            { id: 'ORD-20250121-0008', customer: '吴十', phone: '132****0123', amount: 1899.00, time: '2025-01-21 13:20', region: '南京', status: '待处理', abnormal: 'none', abnormalText: '' },
+            { id: 'ORD-20250121-0009', customer: '郑一', phone: '131****4567', amount: 3599.00, time: '2025-01-21 14:05', region: '成都', status: '待发货', abnormal: 'high', abnormalText: '支付异常' },
+            { id: 'ORD-20250121-0010', customer: '王二', phone: '130****8901', amount: 699.00, time: '2025-01-21 15:30', region: '武汉', status: '已发货', abnormal: 'none', abnormalText: '' },
+        ];
+
+        // 渲染订单表格
+        function renderOrderTable(orders) {
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = '';
+
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+
+                let statusClass = 'status-normal';
+                let statusText = order.status;
+                if (order.status === '待发货' && order.abnormal !== 'none') {
+                    statusClass = 'status-warning';
+                } else if (order.abnormal === 'high') {
+                    statusClass = 'status-danger';
+                }
+
+                let abnormalHtml = '';
+                if (order.abnormal !== 'none') {
+                    abnormalHtml = `<span style="color: ${order.abnormal === 'high' ? '#ff4d4f' : '#faad14'}; font-size: 12px;">
+                        ${order.abnormalText}
+                        <span class="ai-suggestion-icon" onclick="openDiagnosisModal('${order.id}')">🤖</span>
+                    </span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><span class="order-id" onclick="showOrderDetail('${order.id}')">${order.id}</span></td>
+                    <td>${order.customer}<br><span style="color: #8c8c8c; font-size: 12px;">${order.phone}</span></td>
+                    <td>¥ ${order.amount.toFixed(2)}</td>
+                    <td>${order.time}</td>
+                    <td>${order.region}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${abnormalHtml || '-'}</td>
+                    <td>
+                        <button class="action-btn primary" onclick="quickProcess('${order.id}')">处理</button>
+                        <button class="action-btn" onclick="showOrderDetail('${order.id}')">详情</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 打开异常诊断弹窗
+        function openDiagnosisModal(orderId) {
+            const order = orderData.find(o => o.id === orderId);
+            if (order) {
+                document.getElementById('modalOrderId').textContent = order.id;
+                document.getElementById('modalCustomer').textContent = order.customer;
+                document.getElementById('modalAmount').textContent = `¥ ${order.amount.toFixed(2)}`;
+                document.getElementById('modalTime').textContent = order.time;
+                document.getElementById('modalAddress').textContent = order.region + '（详细地址需确认）';
+                document.getElementById('modalStatus').textContent = order.status;
+                document.getElementById('diagnosisModal').classList.add('active');
+            }
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('diagnosisModal').classList.remove('active');
+        }
+
+        // 选择操作方案
+        function selectAction(element, actionType) {
+            document.querySelectorAll('.action-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        // 执行选中操作
+        function executeAction() {
+            closeModal();
+            showToast('操作已执行，订单状态已更新');
+        }
+
+        // 快速处理
+        function quickProcess(orderId) {
+            openDiagnosisModal(orderId);
+        }
+
+        // 显示订单详情
+        function showOrderDetail(orderId) {
+            showToast('打开订单详情: ' + orderId);
+        }
+
+        // AI 搜索
+        function performAISearch() {
+            const query = document.getElementById('aiSearchInput').value;
+            if (!query.trim()) return;
+
+            showTypingIndicator();
+
+            setTimeout(() => {
+                hideTypingIndicator();
+                addAIMessage(`已为您筛选：${query}`);
+                updateFilterTags([query]);
+                showToast(`AI 智能筛选完成，找到 ${Math.floor(Math.random() * 20 + 5)} 条相关订单`);
+            }, 1500);
+        }
+
+        function handleSearchKeypress(event) {
+            if (event.key === 'Enter') {
+                performAISearch();
+            }
+        }
+
+        function applySuggestion(text) {
+            document.getElementById('aiSearchInput').value = text;
+            performAISearch();
+        }
+
+        function updateFilterTags(filters) {
+            const container = document.getElementById('activeFilters');
+            container.innerHTML = filters.map(f => `
+                <span class="filter-tag">${f}<span class="close" onclick="removeFilter('${f}')">×</span></span>
+            `).join('');
+        }
+
+        function removeFilter(filter) {
+            showToast('筛选条件已清除');
+            document.getElementById('activeFilters').innerHTML = '<span class="filter-tag">全部订单<span class="close">×</span></span>';
+        }
+
+        // AI 助手交互
+        function toggleAIAssistant() {
+            const assistant = document.getElementById('aiAssistant');
+            const body = document.getElementById('aiBody');
+            const inputArea = document.querySelector('.ai-input-area');
+
+            if (assistant.classList.contains('minimized')) {
+                assistant.classList.remove('minimized');
+                body.style.display = 'block';
+                inputArea.style.display = 'block';
+            } else {
+                assistant.classList.add('minimized');
+                body.style.display = 'none';
+                inputArea.style.display = 'none';
+            }
+        }
+
+        function showAIAssistant() {
+            const assistant = document.getElementById('aiAssistant');
+            assistant.classList.remove('minimized');
+            document.getElementById('aiBody').style.display = 'block';
+            document.querySelector('.ai-input-area').style.display = 'block';
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('aiInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addUserMessage(message);
+            input.value = '';
+            showTypingIndicator();
+
+            setTimeout(() => {
+                hideTypingIndicator();
+                const responses = {
+                    '异常订单': '当前系统中有 8 笔异常订单需要处理，主要问题包括：库存不足（3笔）、地址异常（2笔）、支付异常（2笔）、配送时间冲突（1笔）。是否需要我逐个为您展示并给出处理建议？',
+                    '库存预警': '检测到以下商品库存低于安全水位：\n• 无线蓝牙耳机 Pro（库存：0，安全库存：50）\n• 智能手表 S2（库存：8，安全库存：30）\n• 快充充电器（库存：15，安全库存：50）\n\n建议优先安排补货或设置缺货提醒。',
+                    '效率建议': '基于近期操作数据分析，发现以下优化空间：\n1. 批量处理订单可提升 40% 效率\n2. 使用 AI 智能搜索可减少 60% 的筛选时间\n3. 异常订单采用 AI 建议方案可缩短 50% 处理时长'
+                };
+
+                let response = responses[message] || '收到您的请求，正在分析中...';
+                if (message.includes('查') || message.includes('筛选')) {
+                    response = '好的，正在为您智能筛选相关订单...';
+                    setTimeout(() => {
+                        applySuggestion(message);
+                    }, 1000);
+                }
+                addAIMessage(response);
+            }, 1500);
+        }
+
+        function handleAIInputKeypress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendAIMessage();
+            }
+        }
+
+        function addUserMessage(text) {
+            const aiBody = document.getElementById('aiBody');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const suggestionCards = document.querySelector('.ai-suggestion-cards');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'ai-message user';
+            messageDiv.innerHTML = `
+                <div class="ai-message-content">${text}</div>
+                <div class="ai-message-time">刚刚</div>
+            `;
+            aiBody.insertBefore(messageDiv, typingIndicator);
+            suggestionCards.style.display = 'none';
+
+            aiBody.scrollTop = aiBody.scrollHeight;
+        }
+
+        function addAIMessage(text) {
+            const aiBody = document.getElementById('aiBody');
+            const typingIndicator = document.getElementById('typingIndicator');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'ai-message';
+            messageDiv.innerHTML = `
+                <div class="ai-message-content">${text.replace(/\n/g, '<br>')}</div>
+                <div class="ai-message-time">刚刚</div>
+            `;
+            aiBody.insertBefore(messageDiv, typingIndicator);
+
+            aiBody.scrollTop = aiBody.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('active');
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        function handleSuggestionCard(type) {
+            const messages = {
+                '异常订单': '帮我查看异常订单',
+                '库存预警': '查看库存预警',
+                '效率建议': '给我一些效率优化建议'
+            };
+            document.getElementById('aiInput').value = messages[type];
+            sendAIMessage();
+        }
+
+        // 快捷操作
+        function quickSearch(type) {
+            document.getElementById('aiSearchInput').value = type;
+            performAISearch();
+        }
+
+        // Toast 提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrderTable(orderData);
+        });
+    </script>
+</body>
+</html>
